@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot Fractal</title>
+    <style>
+        body {
+            font-family: monospace;
+            white-space: pre;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+   
+    <pre id="fractal-output"></pre>
+
+    <script>
+        function generateFractal(width, height, maxIter) {
+            let output = '';
+            
+            for (let row = 0; row < height; ++row) {
+                for (let col = 0; col < width; ++col) {
+                    // Mapping the pixel coordinates to the complex plane
+                    let real = -2.0 + col * 3.0 / width;
+                    let imaginary = -1.5 + row * 3.0 / height;
+                    let c = { real: real, imaginary: imaginary };
+                    let z = { real: 0, imaginary: 0 };
+                    let iter = 0;
+
+                    // Mandelbrot iteration
+                    while (Math.sqrt(z.real * z.real + z.imaginary * z.imaginary) < 2 && iter < maxIter) {
+                        // z = z * z + c
+                        let tempReal = z.real * z.real - z.imaginary * z.imaginary + c.real;
+                        let tempImaginary = 2 * z.real * z.imaginary + c.imaginary;
+                        z.real = tempReal;
+                        z.imaginary = tempImaginary;
+                        iter++;
+                    }
+
+                    // If inside the set, display a star, else a space
+                    if (iter < maxIter) {
+                        output += ' ';
+                    } else {
+                        output += '*';
+                    }
+                }
+                output += '\n'; // New line after each row
+            }
+
+            // Return the generated fractal output
+            return output;
+        }
+
+        // Set dimensions and maximum iterations
+        let width = 200;
+        let height = 100;
+        let maxIter = 1000;
+
+        // Generate the fractal
+        let fractal = generateFractal(width, height, maxIter);
+
+        document.getElementById('fractal-output').textContent = fractal;
+    </script>
+
+    <canvas id="fractalCanvas" width="600" height="1000"></canvas>
+
+    <script>
+         const canvas = document.getElementById('fractalCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Barnsley Fern Algorithm
+        function barnsleyFern(iterations) {
+            let x = 0, y = 0; // Initial position
+            const scale = 60; // Scaling factor for the fern's size
+
+            // Set a color for the fern
+            ctx.fillStyle = "lime"; // Color of the fractal
+
+            // Iterate and plot points for the fern
+            for (let i = 0; i < iterations; i++) {
+                const rand = Math.random();
+                let xNew, yNew;
+
+                if (rand < 0.02) {
+                    // Stem
+                    xNew = 0;
+                    yNew = 0.16 * y;
+                } else if (rand < 0.86) {
+                    // Leaf 1
+                    xNew = 0.85 * x + 0.04 * y;
+                    yNew = -0.04 * x + 0.85 * y + 1.6;
+                } else if (rand < 0.93) {
+                    // Leaf 2
+                    xNew = 0.2 * x - 0.26 * y;
+                    yNew = 0.23 * x + 0.22 * y + 1.6;
+                } else {
+                    // Leaf 3
+                    xNew = -0.15 * x + 0.28 * y;
+                    yNew = 0.26 * x + 0.24 * y + 0.44;
+                }
+
+                // Update the coordinates and plot the point
+                x = xNew;
+                y = yNew;
+
+                // Translate the coordinates to fit on the canvas
+                const plotX = Math.floor(x * scale + canvas.width / 2);
+                const plotY = Math.floor(-y * scale + canvas.height / 1.5); // Invert Y axis to match the canvas
+
+                // Ensure the coordinates are within bounds of the canvas
+                if (plotX >= 0 && plotX < canvas.width && plotY >= 0 && plotY < canvas.height) {
+                    // Draw the point on the canvas
+                    ctx.fillRect(plotX, plotY, 1, 1);
+                }
+            }
+        }
+
+        // Generate the Barnsley Fern with a set number of iterations
+        barnsleyFern(50000);
+</script>
+</body>
+</html>
